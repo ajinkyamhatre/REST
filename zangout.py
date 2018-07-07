@@ -1,33 +1,51 @@
-from pymongo import Connection
+import MySQLdb
 from flask import *
+def db():
+	return MySQLdb.connect('localhost','root','qwerty@123','test')
 app=Flask(__name__)
-con=Connection()
-db=con.shop_database
-users=db.users
-@app.route('/myquery')
-def homepage():
-	ans=users.find()
-	op=''
-	for ch in ans :
-		op=op+' '+str(ch)
+@app.route('/UserService/Users')
+def userall():
+	con = db()
+	cr = con.cursor()
+	query = 'select * from mytable;'
+	cr.execute(query)
+	data = cr.fetchall()
+	ans =[]
+	for i in data:
+		j = {'id' : i[0], 'name' : i[1], 'address' : i[2], 'phone' : i[3] }
+		ans.append(j)
+	
+	con.close()
+	return jsonify(ans)
+@app.route('/UserService/Users/<int:id>')
+def userone(id):
+	con = db()
+	cr = con.cursor()
+	query = 'select * from mytable;'
+	cr.execute(query)
+	data = cr.fetchall()
+	ans =[]
+	for i in data:
+		j = {'id' : i[0], 'name' : i[1], 'address' : i[2], 'phone' : i[3] }
+		ans.append(j)
+	if (id > len(ans)) or (id < 1):
+		op = {'error' : 'array index out of order'}
+	else :
+		op = ans[id-1]
+	con.close()
+	return jsonify(op)
 
-	return op
-
-@app.route('/mypost', methods = ['POST'])
-def api_message():
-	if request.headers['Content-Type'] == 'text/plain':
-        	ans=users.insert(request.data)
-		return str(ans)
-
-	elif request.headers['Content-Type'] == 'application/json':
-
-	        ans=users.insert((request.json))
-		return str(ans)
-
-
-	else:
-	        return "415 Unsupported Media Type"
-
+@app.route('/UserService/Users', methods =['GET','PUT'])
+def userput():
+	con = db()
+	cr = con.cursor()
+	if request.method == 'PUT':
+		data = request.json
+		query = "insert into mytable (name,address,phone) values ('%s','%s','%s')"%(data['name'],data['address'],data['phone'])
+		cr.execute(query)
+		con.commit()
+	con.close()
+	return "ok"
 if __name__=="__main__":
         app.run('localhost',8080,debug=True)
 
