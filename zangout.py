@@ -3,20 +3,20 @@ from flask import *
 def db():
 	return MySQLdb.connect('localhost','root','qwerty@123','test')
 app=Flask(__name__)
+
 @app.route('/UserService/Users')
 def userall():
-	con = db()
-	cr = con.cursor()
+	connection = db()
+	cursor = connection.cursor()
 	query = 'select * from mytable;'
-	cr.execute(query)
-	data = cr.fetchall()
-	ans =[]
-	for i in data:
-		j = {'id' : i[0], 'name' : i[1], 'address' : i[2], 'phone' : i[3] }
-		ans.append(j)
-	
-	con.close()
-	return jsonify(ans)
+	cursor.execute(query)
+	data = cursor.fetchall()
+	output = []
+	for user in data:
+		user_data = {'id': user[0], 'name': user[1], 'address': user[2], 'phone': user[3]}
+		output.append(user_data)
+	connection.close()
+	return jsonify(output)
 @app.route('/UserService/Users/<int:id>')
 def userone(id):
 	con = db()
