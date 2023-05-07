@@ -6,7 +6,7 @@ def db():
     return MySQLdb.connect('localhost', 'root', 'qwerty@123', 'test')
 
 
-def get_user_list(id=None):
+def get_user_list(user_id=None):
     connection = db()
     cursor = connection.cursor()
     query = 'select * from mytable;'
@@ -14,8 +14,8 @@ def get_user_list(id=None):
     data = cursor.fetchall()
     output = []
     for user in data:
-        user_data = {'id': user[0], 'name': user[1], 'address': user[2], 'phone': user[3]}
-        if id and id == user_data['id']:
+        user_data = {'user_id': user[0], 'name': user[1], 'address': user[2], 'phone': user[3]}
+        if user_id and user_id == user_data['user_id']:
             output.append(user_data)
         else:
             output.append(user_data)
@@ -32,22 +32,22 @@ def get_all_users():
     return jsonify(output)
 
 
-@app.route('/UserService/Users/<int:id>')
-def get_user(id):
-    output = get_user_list(id)
+@app.route('/UserService/Users/<int:user_id>')
+def get_user(user_id):
+    output = get_user_list(user_id)
     return jsonify(output)
 
 
 @app.route('/UserService/Users', methods=['GET', 'PUT'])
 def update_user():
-    con = db()
-    cr = con.cursor()
+    connection = db()
+    cursor = connection.cursor()
     if request.method == 'PUT':
         data = request.json
         query = f"insert into mytable (name,address,phone) values ('{data['name']}','{data['address']}','{data['phone']}')"
-        cr.execute(query)
-        con.commit()
-    con.close()
+        cursor.execute(query)
+        connection.commit()
+    connection.close()
     return jsonify({"response": "ok"})
 
 
